@@ -1,6 +1,7 @@
 from flask import Flask, render_template
 
 from tarefas.models.database import init_db
+from tarefas.models.tarefa import Tarefa
 
 app = Flask(__name__)
 
@@ -13,7 +14,14 @@ def test():
 
 @app.route('/')
 def home():
-    return render_template('base.html', titulo='Lista de tarefas fabio')
+
+    tarefas = Tarefa.ListarTarefas()
+
+    return render_template(
+        'base.html',
+        titulo_da_pagina ='minha lista de tarefas', 
+        tarefas_da_pagina =tarefas
+    )
 
 if __name__ == '__main__':
     app.run()

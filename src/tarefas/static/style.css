@@ -149,6 +149,7 @@ button:focus-visible {
     flex-direction: column;
     gap: 12px;
     margin-top: 16px;
+    padding-inline-start: 0;
 }
 
 /* Cada tarefa é um div criado pelo JavaScript */
