@@ -1,45 +1,51 @@
+from datetime import datetime
+ 
 from tarefas.models.database import Database
-
+ 
  
 class Tarefa:
     """
-    Gerencia as tarefas criadas pelo formulário principal.
+    Provê métodos para armazenar, recuperar e processar os dados das tarefas 
+    criadas a partir do formulário principal.
     """
- 
-    def __init__(self, titulo, id=None, data_conclusao=None):
+    
+    def __init__(self, titulo, id = None, data_conclusao = None):
         self.id = id
         self.titulo = titulo
         self.data_conclusao = data_conclusao
  
+ 
     def salvarTarefa(self):
         """Salva a tarefa no banco de dados."""
  
-        sql = """
-            INSERT INTO tarefas
-            (titulo_tarefa, data_conclusao)
-            VALUES (%s, %s)
-        """
- 
-        params = (self.titulo, self.data_conclusao)
+        sql = '''INSERT INTO tarefas (titulo_tarefa, data_conclusao) 
+        VALUES (%s, %s);'''
+        params = (self.titulo, self.data_conclusao) 
  
         with Database() as db:
             db.executar(sql, params)
-
-
-    @staticmethod 
-    def listarTarefas():
+ 
+ 
+    @staticmethod
+    def listarTarefas() -> list:
         """Retorna uma lista com todas as tarefas cadastradas."""
-
-        sql = '''SELECT id_tarefa, titulo_tarefa, data_conclusao
-        FROM tarefa LIMIT 100;'''
-
+ 
+        sql = '''SELECT id_tarefa, titulo_tarefa, data_conclusao 
+        FROM tarefas LIMIT 100;'''
+ 
         with Database() as db:
-            tarefas_bancos = db.executar(sql)
-
-        return tarefas_bancos if tarefas_bancos else []
+            tarefas_banco = db.executar(sql)
+ 
+        return tarefas_banco if tarefas_banco else []
+ 
+    
+    @staticmethod
+    def apagarTarefa():
+        pass
  
  
-# Área 51 - Testes
-# if __name__ == '__main__':
-#   tarefa = Tarefa('Minha nova tarefa')
-#  tarefa.salvarTarefa()
+# Área 51 (testes)
+# tarefa = Tarefa('Terceira tarefa do Galbiati via Python')
+# tarefa.salvarTarefa()
+# tarefa = Tarefa('Terceira tarefa do Galbiati via Python')
+# tarefa.salvarTarefa()

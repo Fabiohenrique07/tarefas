@@ -2,8 +2,6 @@ CREATE DATABASE IF NOT EXISTS `tarefas`;
 
 USE `tarefas`;
 
-DROP TABLE tarefa;
-
 CREATE TABLE IF NOT EXISTS `tarefas` (
     `id_tarefa` INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
     `titulo_tarefa` VARCHAR(100) NOT NULL,
