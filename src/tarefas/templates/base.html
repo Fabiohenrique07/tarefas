@@ -1,105 +1,137 @@
-
 <!DOCTYPE html>
 <html lang="pt-BR">
+ 
 <head>
     <meta charset="UTF-8">
+ 
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{{ título_da_pagina }}</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='style.css' ) }}">
+ 
+    <title>{{ titulo_da_pagina }}</title>
+ 
+    <!-- Arquivo de estilo da aplicação -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
+ 
 <body>
-    <h1>Digite a tarefa e a data de conclusão (opcional):</h1>
-
-    <form mwthod="GET" action=","> # seleciona o metodo HTTP
-        <input type="text" id="tituloTarefa" name="tituloTarefa">
-        <input type="date" id="dataConclusao" name="dataConclusao">
-        <button type="submit">Adicionar</button>  
-    </form>
-   <!-- <output id="listaTarefas">nenhuma tarefa cadastrada</output> -->
-
+ 
+    <h2>Minha Lista de Tarefas</h2>
+ 
+    {% if tarefa_editar %}
+ 
+        <!-- Formulário para atualizar uma tarefa -->
+        <h3>Atualizar tarefa</h3>
+ 
+        <form method="POST"
+        action="{{ url_for('atualizar_id_especificado', id=tarefa_editar.id_tarefa) }}">
+ 
+            <!-- Mostra o título atual -->
+            <input
+                type="text"
+                name="tituloTarefa"
+                value="{{ tarefa_editar.titulo_tarefa }}"
+                placeholder="Digite a tarefa"
+                required
+            >
+ 
+            <!-- Mostra a data atual -->
+            <input
+                type="date"
+                name="dataConclusao"
+                value="{{ tarefa_editar.data_conclusao.strftime('%Y-%m-%d') if tarefa_editar.data_conclusao else '' }}"
+            >
+ 
+            <button type="submit">Salvar alterações</button>
+ 
+            <a href="{{ url_for('home') }}">Cancelar</a>
+ 
+        </form>
+ 
+    {% else %}
+ 
+        <!-- Formulário para adicionar uma tarefa -->
+        <h3>Adicionar tarefa</h3>
+ 
+        <form method="POST" action="{{ url_for('home') }}">
+ 
+            <input
+                type="text"
+                id="tituloTarefa"
+                name="tituloTarefa"
+                placeholder="Digite sua tarefa"
+                required
+            >
+ 
+            <input
+                type="date"
+                id="dataConclusao"
+                name="dataConclusao"
+            >
+ 
+            <button type="submit">Adicionar</button>
+ 
+        </form>
+ 
+    {% endif %}
+ 
+ 
+    <!-- Lista de tarefas cadastradas no banco -->
+    <h3>Tarefas cadastradas</h3>
+ 
     <ul id="listaTarefas">
+ 
         {% for tarefa in tarefas_da_pagina %}
-        <li>
-            {{ tarefa.titulo_tarefa }} - {{ tarefa.data_conclusao }}
-            <a href="#">Apagar</a> <!-- Link para a rota de apagar este Id -->
-        </li>
+ 
+            <li>
+ 
+                <div class="informacoes">
+ 
+                    <!-- Título da tarefa -->
+                    <strong>{{ tarefa.titulo_tarefa }}</strong>
+ 
+                    <!-- Data de conclusão -->
+                    <span>
+                        {% if tarefa.data_conclusao %}
+                            {{ tarefa.data_conclusao.strftime('%d/%m/%Y') }}
+                        {% else %}
+                            Sem data definida
+                        {% endif %}
+                    </span>
+ 
+                </div>
+ 
+                <div class="botoes">
+ 
+                    <!-- Botão para editar a tarefa -->
+                    <a class="editar"
+                    href="{{ url_for('editar_tarefa', id=tarefa.id_tarefa) }}">
+                        Editar
+                    </a>
+ 
+                    <!-- Lição 1 - Botão para apagar a tarefa -->
+                    <form
+                        method="POST"
+                        action="{{ url_for('apagar_id_especificado', id=tarefa.id_tarefa) }}"
+                        onsubmit="return confirm('Deseja apagar esta tarefa?');"
+                    >
+ 
+                        <button type="submit" class="apagar">
+                            Apagar
+                        </button>
+ 
+                    </form>
+ 
+                </div>
+ 
+            </li>
+ 
+        {% else %}
+ 
+            <!-- Mensagem caso não existam tarefas -->
+            <li>Nenhuma tarefa cadastrada.</li>
+ 
         {% endfor %}
+ 
     </ul>
-
-    <!-- <script>
-        // Aplicação MVC (Modelagem-Visualização-Controle)
-
-        // Seção de Modelagem
-        let tarefas;
-        const tarefasSalvas = JSON.parse(localStorage.getItem('tarefas'));
-
-        if (Array.isArray(tarefasSalvas)) {
-            tarefas = tarefasSalvas;
-        } else {
-            tarefas = [];
-        }
-
-        function salvarTarefas() {
-            localStorage.setItem('tarefas', JSON.stringify(tarefas));
-        }
-
-        // Seção de Visualização
-        function renderizarTarefas() {
-            const listaTarefas = document.getElementById('listaTarefas');
-            listaTarefas.innerHTML = "";
-
-            if (tarefas.length === 0) {
-                listaTarefas.textContent = "nenhuma tarefa cadastrada";
-                return;
-            }
-
-            tarefas.forEach(function (tarefa) {
-                const divTarefa = document.createElement('div');
-                divTarefa.textContent = tarefa.tituloTarefa + ' - ' + tarefa.dataConclusao + ' ';
-
-                const botaoApagar = document.createElement('button');
-                botaoApagar.textContent = "❌ Apagar";
-                botaoApagar.onclick = function () {
-                    apagarTarefa(tarefa.idTarefa);
-                };
-
-                divTarefa.appendChild(botaoApagar);
-                listaTarefas.appendChild(divTarefa);
-            });
-        }
-
-        // Seção de controle
-        function adicionarTarefa() {
-            const tituloTarefa = document.getElementById('tituloTarefa').value;
-            const dataConclusao = document.getElementById('dataConclusao').value;
-
-            if (tituloTarefa.trim() === "") {
-                return;
-            }
-
-            tarefas.push(
-                {
-                    tituloTarefa: tituloTarefa,
-                    dataConclusao: dataConclusao,
-                    idTarefa: Date.now()
-                }
-            );
-
-            salvarTarefas();
-            renderizarTarefas();
-        }
-
-        function apagarTarefa(idTarefa) {
-            tarefas = tarefas.filter(function (tarefa) {
-                return tarefa.idTarefa !== idTarefa;
-            });
-
-            salvarTarefas();
-            renderizarTarefas();
-        }
-
-        renderizarTarefas();
-
-    </script>
-</body> -->
+ 
+</body>
 </html>

@@ -1,51 +1,84 @@
-from datetime import datetime
- 
 from tarefas.models.database import Database
  
  
 class Tarefa:
     """
-    Provê métodos para armazenar, recuperar e processar os dados das tarefas 
-    criadas a partir do formulário principal.
+    Classe responsável por gerenciar as tarefas.
     """
-    
-    def __init__(self, titulo, id = None, data_conclusao = None):
+ 
+    def __init__(self, titulo, id=None, data_conclusao=None):
         self.id = id
         self.titulo = titulo
         self.data_conclusao = data_conclusao
  
- 
     def salvarTarefa(self):
-        """Salva a tarefa no banco de dados."""
  
-        sql = '''INSERT INTO tarefas (titulo_tarefa, data_conclusao) 
-        VALUES (%s, %s);'''
-        params = (self.titulo, self.data_conclusao) 
+        sql = '''
+            INSERT INTO tarefas
+            (titulo_tarefa, data_conclusao)
+            VALUES (%s, %s);
+        '''
  
-        with Database() as db:
-            db.executar(sql, params)
- 
- 
-    @staticmethod
-    def listarTarefas() -> list:
-        """Retorna uma lista com todas as tarefas cadastradas."""
- 
-        sql = '''SELECT id_tarefa, titulo_tarefa, data_conclusao 
-        FROM tarefas LIMIT 100;'''
+        params = (self.titulo, self.data_conclusao)
  
         with Database() as db:
-            tarefas_banco = db.executar(sql)
- 
-        return tarefas_banco if tarefas_banco else []
- 
-    
+            return db.executar(sql, params)
+
     @staticmethod
-    def apagarTarefa():
-        pass
+    def listarTarefas():
  
+        sql = '''
+            SELECT id_tarefa, titulo_tarefa, data_conclusao
+            FROM tarefas
+            LIMIT 100;
+        '''
  
-# Área 51 (testes)
-# tarefa = Tarefa('Terceira tarefa do Galbiati via Python')
-# tarefa.salvarTarefa()
-# tarefa = Tarefa('Terceira tarefa do Galbiati via Python')
-# tarefa.salvarTarefa()
+        with Database() as db:
+            tarefas = db.executar(sql)
+ 
+        return tarefas if tarefas else []
+ 
+    @staticmethod
+    def buscarTarefa(id):
+ 
+        sql = '''
+            SELECT id_tarefa, titulo_tarefa, data_conclusao
+            FROM tarefas
+            WHERE id_tarefa = %s;
+        '''
+ 
+        with Database() as db:
+            resultado = db.executar(sql, (id,))
+ 
+        if resultado:
+            return resultado[0]
+ 
+        return None
+ 
+    # (DELETE)
+    @staticmethod
+    def apagarTarefa(id):
+ 
+        sql = '''
+            DELETE FROM tarefas
+            WHERE id_tarefa = %s;
+        '''
+ 
+        with Database() as db:
+            return db.executar(sql, (id,))
+ 
+    # (UPDATE)
+    @staticmethod
+    def atualizarTarefa(id, titulo, data_conclusao):
+ 
+        sql = '''
+            UPDATE tarefas
+            SET titulo_tarefa = %s,
+                data_conclusao = %s
+            WHERE id_tarefa = %s;
+        '''
+ 
+        params = (titulo, data_conclusao, id)
+ 
+        with Database() as db:
+            return db.executar(sql, params)
